@@ -5,7 +5,9 @@
 
 // === UTILIDADES ===
 async function cargarJSON(url) {
-  const res = await fetch(url);
+  // Cache-buster: agrega timestamp para evitar caché del navegador
+  const sep = url.includes('?') ? '&' : '?';
+  const res = await fetch(`${url}${sep}_t=${Date.now()}`);
   if (!res.ok) throw new Error(`Error al cargar ${url}`);
   return res.json();
 }
