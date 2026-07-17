@@ -414,12 +414,18 @@ async function openEditor(key) {
 
     items = data.data?.lista || [];
     sha = data.sha || null;
-    renderItems();
+    if (key === 'calendario') {
+      renderCalendario();
+      addBtn.style.display = 'none';
+    } else {
+      renderItems();
+      addBtn.style.display = '';
+    }
     editorLoading.style.display = 'none';
-    editorStatus.textContent = `${items.length} item(s)`;
+    editorStatus.textContent = `${items.length} ${key === 'calendario' ? 'fecha(s)' : 'item(s)'}`;
     editorStatus.className = 'editor-status ok';
     saveBtn.disabled = false;
-    addBtn.disabled = false;
+    addBtn.disabled = currentCollection === 'calendario';
     setStatus('Listo');
   } catch (e) {
     showToast('Error de conexión', 'err');
@@ -547,6 +553,114 @@ function renderItems() {
 
     itemsContainer.appendChild(div);
   });
+}
+
+// ─── Calendario visual ───
+function renderCalendario() {
+  const meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+    'Julio', 'Agosto', 'Setiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+
+  let calMes = new Date().getMonth();
+  let calAnio = new Date().getFullYear();
+
+  function buildCal() {
+    const diasSemana = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+    const primerDia = new Date(calAnio, calMes, 1);
+    const ultimoDia = new Date(calAnio, calMes + 1, 0);
+    const diasEnMes = ultimoDia.getDate();
+    const diaInicio = primerDia.getDay();
+
+    let html = `
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;gap:.5rem;flex-wrap:wrap">
+        <button class="btn btn-outline" id="cal-prev">← ${meses[(calMes + 11) % 12]}</button>
+        <strong style="font-size:1.1rem">${meses[calMes]} ${calAnio}</strong>
+        <button class="btn btn-outline" id="cal-next">${meses[(calMes + 1) % 12]} →</button>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:4px">
+        ${diasSemana.map(d => `<div style="text-align:center;font-size:.78rem;color:#8a7a6a;padding:.25rem 0">${d}</div>`).join('')}
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px">
+    `;
+
+    for (let i = 0; i < diaInicio; i++) html += '<div></div>';
+
+    for (let dia = 1; dia <= diasEnMes; dia++) {
+      const fechaStr = `${calAnio}-${String(calMes + 1).padStart(2, '0')}-${String(dia).padStart(2, '0')}`;
+      const entrada = items.find(d => d.fecha?.substring(0, 10) === fechaStr);
+
+      let bg = '#f5f2ed';
+      let label = '';
+      let tipo = entrada?.tipo || '';
+
+      if (tipo === 'venta') { bg = '#c8e6c9'; label = '💚'; }
+      else if (tipo === 'especial') { bg = '#fff9c4'; label = '💛'; }
+      else if (tipo === 'feriado') { bg = '#ffcdd2'; label = '❤️'; }
+
+      const desc = entrada?.descripcion ? entrada.descripcion : '';
+      html += `<div class="cal-day" data-fecha="${fechaStr}" data-tipo="${tipo}"
+        style="aspect-ratio:1;background:${bg};border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;font-size:.85rem;font-weight:500;border:2px solid transparent"
+        title="${desc || fechaStr}">
+        <span>${dia}</span>
+        ${label ? `<span style="font-size:.75rem;line-height:1">${label}</span>` : ''}
+      </div>`;
+    }
+
+    html += '</div>';
+
+    // Leyenda
+    html += `
+      <div style="display:flex;gap:1rem;margin-top:1rem;flex-wrap:wrap;font-size:.82rem">
+        <span style="display:flex;align-items:center;gap:.3rem"><span style="display:inline-block;width:14px;height:14px;background:#c8e6c9;border-radius:3px"></span> Venta</span>
+        <span style="display:flex;align-items:center;gap:.3rem"><span style="display:inline-block;width:14px;height:14px;background:#fff9c4;border-radius:3px"></span> Especial</span>
+        <span style="display:flex;align-items:center;gap:.3rem"><span style="display:inline-block;width:14px;height:14px;background:#ffcdd2;border-radius:3px"></span> Sin venta</span>
+        <span style="display:flex;align-items:center;gap:.3rem"><span style="display:inline-block;width:14px;height:14px;background:#f5f2ed;border-radius:3px;border:1px solid #ddd"></span> Sin definir</span>
+      </div>
+      <p style="font-size:.8rem;color:#8a7a6a;margin-top:.5rem">💡 Hacé clic en un día para cambiar: vacío → 💚 Venta → 💛 Especial → ❤️ Sin venta → vacío</p>
+    `;
+
+    itemsContainer.innerHTML = html;
+
+    // Clicks en días
+    document.querySelectorAll('.cal-day').forEach(el => {
+      el.addEventListener('click', () => {
+        const fecha = el.dataset.fecha;
+        const tipoActual = el.dataset.tipo;
+        let newTipo;
+        if (!tipoActual) newTipo = 'venta';
+        else if (tipoActual === 'venta') newTipo = 'especial';
+        else if (tipoActual === 'especial') newTipo = 'feriado';
+        else newTipo = '';
+
+        const idx = items.findIndex(d => d.fecha?.substring(0, 10) === fecha);
+
+        if (!newTipo) {
+          if (idx !== -1) items.splice(idx, 1);
+        } else {
+          const maxId = items.length > 0 ? Math.max(...items.map(i => i.id || 0)) : 0;
+          if (idx !== -1) {
+            items[idx].tipo = newTipo;
+          } else {
+            items.push({ id: maxId + 1, fecha, tipo: newTipo, descripcion: '' });
+          }
+        }
+
+        editorStatus.textContent = `${items.length} fecha(s) · sin guardar`;
+        setStatus('Hay cambios sin guardar');
+        buildCal();
+      });
+    });
+
+    document.getElementById('cal-prev')?.addEventListener('click', () => {
+      calMes--; if (calMes < 0) { calMes = 11; calAnio--; }
+      buildCal();
+    });
+    document.getElementById('cal-next')?.addEventListener('click', () => {
+      calMes++; if (calMes > 11) { calMes = 0; calAnio++; }
+      buildCal();
+    });
+  }
+
+  buildCal();
 }
 
 // ─── Add Item ───
