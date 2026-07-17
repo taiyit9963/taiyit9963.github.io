@@ -23,6 +23,12 @@
       "fecha": "2026-07-20",
       "tipo": "feriado",
       "descripcion": "Domingo — sin venta"
+    },
+    {
+      "id": 5,
+      "fecha": "2026-07-21",
+      "tipo": "venta",
+      "descripcion": ""
     }
   ]
 }
