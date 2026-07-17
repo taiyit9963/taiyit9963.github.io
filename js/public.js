@@ -23,10 +23,14 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (posts.length === 0) {
         timeline.innerHTML = '<p style="text-align:center;padding:2rem;color:var(--texto-claro);">Todavía no hay posts. ¡Volvé pronto!</p>';
       } else {
-        // Ordenar por fecha descendente (más reciente primero)
-        posts.sort((a, b) => new Date(b.fecha_publicacion) - new Date(a.fecha_publicacion));
+        // Mostrar solo posts con fecha actual o pasada, ordenados del más reciente primero
+        const hoy = new Date();
+        hoy.setHours(0, 0, 0, 0);
+        const postsVisibles = posts
+          .filter(p => new Date(p.fecha_publicacion + 'T12:00:00') <= hoy)
+          .sort((a, b) => new Date(b.fecha_publicacion) - new Date(a.fecha_publicacion));
 
-        timeline.innerHTML = posts.map(post => `
+        timeline.innerHTML = postsVisibles.map(post => `
           <div class="post">
             <div class="post-imagen-wrap">
               ${post.imagen_url
