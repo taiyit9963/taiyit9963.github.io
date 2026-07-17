@@ -2,10 +2,10 @@
   "lista": [
     {
       "id": null,
-      "nombre": "",
-      "descripcion": "",
-      "precio": null,
-      "imagen_url": "",
+      "nombre": "Churro Bite",
+      "descripcion": "Deliciosa galleta rellena de dulce de leche y espolvoreada con una mezcla de azúcar y Canela que le dan ese toque de churro",
+      "precio": 10,
+      "imagen_url": "images/uploads/1784325719190_1000133885.png",
       "disponible": true
     },
     {
