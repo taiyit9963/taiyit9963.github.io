@@ -24,10 +24,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         timeline.innerHTML = '<p style="text-align:center;padding:2rem;color:var(--texto-claro);">Todavía no hay posts. ¡Volvé pronto!</p>';
       } else {
         // Mostrar solo posts con fecha actual o pasada, ordenados del más reciente primero
-        const hoy = new Date();
-        hoy.setHours(0, 0, 0, 0);
+        const hoyStr = new Date().toLocaleDateString('en-CA'); // "2026-07-17"
         const postsVisibles = posts
-          .filter(p => new Date(p.fecha_publicacion + 'T12:00:00') <= hoy)
+          .filter(p => p.fecha_publicacion <= hoyStr)
           .sort((a, b) => new Date(b.fecha_publicacion) - new Date(a.fecha_publicacion));
 
         timeline.innerHTML = postsVisibles.map(post => `
