@@ -1,38 +1,38 @@
 {
   "lista": [
     {
-      "id": null,
+      "id": 1,
       "imagen_url": "images/uploads/1784326076271_triple_choco-bite__32_.png",
       "texto": "Delicios brownies fudgy espolvoreados con azúcar glass",
-      "precio": 10,
+      "precio": "10",
       "fecha_publicacion": "2026-07-17"
     },
     {
       "id": null,
       "imagen_url": "",
       "texto": "",
-      "precio": null,
+      "precio": "",
       "fecha_publicacion": ""
     },
     {
       "id": null,
       "imagen_url": "",
       "texto": "",
-      "precio": null,
+      "precio": "",
       "fecha_publicacion": ""
     },
     {
       "id": null,
       "imagen_url": "",
       "texto": "",
-      "precio": null,
+      "precio": "",
       "fecha_publicacion": ""
     },
     {
       "id": null,
       "imagen_url": "",
       "texto": "",
-      "precio": null,
+      "precio": "",
       "fecha_publicacion": ""
     }
   ]
