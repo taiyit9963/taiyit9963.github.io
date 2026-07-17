@@ -27,6 +27,13 @@
       "texto": "",
       "precio": null,
       "fecha_publicacion": ""
+    },
+    {
+      "id": 56475,
+      "imagen_url": "",
+      "texto": "hvhv",
+      "precio": 12,
+      "fecha_publicacion": "2026-07-17"
     }
   ]
 }
