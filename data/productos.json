@@ -1,42 +1,34 @@
 {
   "lista": [
     {
-      "id": 1,
-      "nombre": "Galleta de Chocolate",
-      "descripcion": "Deliciosa galleta artesanal con chispas de chocolate. Crujiente por fuera, suave por dentro.",
-      "precio": 3.50,
+      "id": null,
+      "nombre": "",
+      "descripcion": "",
+      "precio": null,
       "imagen_url": "",
       "disponible": true
     },
     {
-      "id": 2,
-      "nombre": "Alfajor de Dulce de Leche",
-      "descripcion": "Dos tapitas de galleta rellenas de dulce de leche repostero, bañadas en chocolate.",
-      "precio": 4.00,
+      "id": null,
+      "nombre": "",
+      "descripcion": "",
+      "precio": null,
       "imagen_url": "",
       "disponible": true
     },
     {
-      "id": 3,
-      "nombre": "Galleta de Avena y Pasas",
-      "descripcion": "Galleta suave de avena con pasas de uva. Ideal para el desayuno.",
-      "precio": 3.00,
+      "id": null,
+      "nombre": "",
+      "descripcion": "",
+      "precio": null,
       "imagen_url": "",
       "disponible": true
     },
     {
-      "id": 4,
-      "nombre": "Brownie Artesanal",
-      "descripcion": "Brownie húmedo de chocolate con nueces. Un clásico irresistible.",
-      "precio": 5.00,
-      "imagen_url": "",
-      "disponible": true
-    },
-    {
-      "id": 5,
-      "nombre": "Galleta de Vainilla con Chispas de Colores",
-      "descripcion": "Galleta suave de vainilla decorada con chispas de colores. Perfecta para los más pequeños.",
-      "precio": 3.50,
+      "id": null,
+      "nombre": "",
+      "descripcion": "",
+      "precio": null,
       "imagen_url": "",
       "disponible": true
     }
