@@ -49,6 +49,35 @@ export default {
       return json({ success: true });
     }
 
+    // ───── SUBIR IMAGEN ─────
+    if (path === '/api/upload' && request.method === 'POST') {
+      const auth = request.headers.get('Authorization');
+      if (!auth || !auth.startsWith('Bearer ') || auth.slice(7) !== env.ADMIN_PASSWORD) {
+        return json({ error: 'No autorizado' }, 401);
+      }
+      const { filename, content } = await request.json();
+      if (!filename || !content) return json({ error: 'Faltan filename o content' }, 400);
+
+      const ts = Date.now();
+      const safe = filename.replace(/[^a-zA-Z0-9._-]/g, '_');
+      const uploadPath = `images/uploads/${ts}_${safe}`;
+
+      const ghRes = await fetch(`https://api.github.com/repos/${REPO}/contents/${uploadPath}`, {
+        method: 'PUT',
+        headers: {
+          Authorization: `Bearer ${env.GIT_TOKEN}`,
+          Accept: 'application/vnd.github+json',
+          'Content-Type': 'application/json',
+          'User-Agent': 'lousbite-admin',
+        },
+        body: JSON.stringify({ message: `📸 Subir ${safe}`, content, branch: 'main' }),
+      });
+      const result = await ghRes.json();
+      if (!ghRes.ok) return json({ error: 'Error al subir imagen', detail: result.message }, 500);
+
+      return json({ success: true, url: uploadPath, filename: `${ts}_${safe}` });
+    }
+
     // ───── DATOS ─────
     const match = path.match(/^\/api\/data\/(productos|posts|calendario)$/);
     if (!match) return json({ error: 'Endpoint no encontrado' }, 404);

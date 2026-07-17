@@ -205,6 +205,9 @@
 <!-- ─── Toast ─── -->
 <div class="toast" id="toast"></div>
 
+<!-- ─── File input oculto para subir imágenes ─── -->
+<input type="file" id="file-input" accept="image/*" style="display:none" />
+
 <script>
 const API = 'https://lousbite-admin.andululze.workers.dev';
 
@@ -218,7 +221,7 @@ const COLLECTIONS = {
       { name: 'nombre', label: 'Nombre', type: 'string', required: true },
       { name: 'descripcion', label: 'Descripción', type: 'text' },
       { name: 'precio', label: 'Precio ($)', type: 'number', step: '0.01' },
-      { name: 'imagen_url', label: 'URL de imagen', type: 'string' },
+      { name: 'imagen_url', label: 'Imagen', type: 'string', widget: 'image' },
       { name: 'disponible', label: 'Disponible', type: 'boolean' },
     ],
   },
@@ -228,7 +231,7 @@ const COLLECTIONS = {
     desc: 'Timeline de la página principal',
     fields: [
       { name: 'id', label: 'ID', type: 'number' },
-      { name: 'imagen_url', label: 'URL de imagen', type: 'string' },
+      { name: 'imagen_url', label: 'Imagen', type: 'string', widget: 'image' },
       { name: 'texto', label: 'Texto', type: 'text' },
       { name: 'precio', label: 'Precio ($)', type: 'number', step: '0.01' },
       { name: 'fecha_publicacion', label: 'Fecha', type: 'date', required: true },
@@ -504,6 +507,15 @@ function renderItems() {
           <input type="date" id="f-${idx}-${f.name}" name="${f.name}" value="${clr(val)}" />
         </div>`;
       }
+      if (f.widget === 'image') {
+        return `<div class="form-row">
+          <label for="f-${idx}-${f.name}">${f.label}</label>
+          <div style="display:flex;gap:.5rem">
+            <input type="text" id="f-${idx}-${f.name}" name="${f.name}" value="${clr(val).replace(/"/g, '&quot;')}" style="flex:1" placeholder="URL o subí una imagen" />
+            <button type="button" class="btn btn-outline upload-btn" data-idx="${idx}" data-field="${f.name}" style="white-space:nowrap">📁 Subir</button>
+          </div>
+        </div>`;
+      }
       return `<div class="form-row">
         <label for="f-${idx}-${f.name}">${f.label}</label>
         <input type="text" id="f-${idx}-${f.name}" name="${f.name}" value="${clr(val).replace(/"/g, '&quot;')}" />
@@ -608,6 +620,56 @@ saveBtn.addEventListener('click', async () => {
     saveBtn.disabled = false;
     saveBtn.textContent = '💾 Guardar';
   }
+});
+
+// ─── Subir imagen ───
+let uploadTarget = null; // { idx, field }
+
+const fileInput = document.getElementById('file-input');
+
+itemsContainer.addEventListener('click', e => {
+  const btn = e.target.closest('.upload-btn');
+  if (!btn) return;
+  uploadTarget = { idx: parseInt(btn.dataset.idx), field: btn.dataset.field };
+  fileInput.click();
+});
+
+fileInput.addEventListener('change', async () => {
+  const file = fileInput.files[0];
+  if (!file || !uploadTarget) return;
+
+  // Leer archivo como base64
+  const reader = new FileReader();
+  reader.onload = async () => {
+    const base64 = reader.result.split(',')[1]; // sacar "data:image/...;base64,"
+
+    setStatus('Subiendo imagen...');
+    try {
+      const res = await api('/api/upload', {
+        method: 'POST',
+        body: JSON.stringify({ filename: file.name, content: base64 }),
+      });
+      const data = await res.json();
+      if (!data.success) {
+        showToast(data.error || 'Error al subir', 'err');
+        setStatus('Error');
+        return;
+      }
+
+      // Llenar el campo URL
+      const input = document.querySelector(
+        `.item:nth-child(${uploadTarget.idx + 1}) .item-form input[name="${uploadTarget.field}"]`
+      );
+      if (input) input.value = data.url;
+      showToast('✅ Imagen subida');
+      setStatus('Imagen lista');
+    } catch (e) {
+      showToast('Error de conexión al subir', 'err');
+      setStatus('Error');
+    }
+  };
+  reader.readAsDataURL(file);
+  fileInput.value = '';
 });
 
 // ─── Init ───
